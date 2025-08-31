@@ -1,0 +1,1184 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>نظام دفتر العمليات – المستشفى السعودي كسلا</title>
+  <style>
+    :root{
+      --bg:#f0f7ff;        /* خلفية زرقاء فاتحة */
+      --card:#ffffff;      /* خلفية البطاقات بيضاء */
+      --muted:#e6f2ff;     /* خلفية العناصر الثانوية */
+      --ink:#1e3a8a;       /* نص أزرق غامق */
+      --ink-dim:#4b5563;   /* نص ثانوي */
+      --brand:#3b82f6;     /* لون رئيسي أزرق */
+      --accent:#8b5cf6;    /* لون ثانوي بنفسجي */
+      --ok:#10b981;        /* لون النجاح أخضر */
+      --warn:#f59e0b;      /* لون التحذير برتقالي */
+      --danger:#ef4444;    /* لون الخطر أحمر */
+      --radius:16px;
+      --shadow:0 4px 12px rgba(0,0,0,0.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%);
+      font-family:"Tajawal","Cairo",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+      color:var(--ink);
+      line-height:1.6;
+    }
+    .container{max-width:1200px;margin:0 auto;padding:24px}
+    .card{
+      background:var(--card);
+      border:1px solid rgba(59, 130, 246, 0.15);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .p-24{padding:24px}
+    .mt-16{margin-top:16px}.mt-24{margin-top:24px}.mt-32{margin-top:32px}.mb-16{margin-bottom:16px}
+    .grid{display:grid;gap:16px}
+    .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    @media (max-width:900px){.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:700px){.grid-3,.grid-2,.grid-4{grid-template-columns:1fr}}
+    h1{font-size:28px;margin:0 0 8px; color:var(--brand);}
+    h2{font-size:22px;margin:0 0 8px;color:var(--accent)}
+    p.muted{color:var(--ink-dim);margin:0}
+    label{display:block;color:var(--ink-dim);font-size:14px;margin-bottom:6px}
+    input,select,textarea{
+      width:100%;padding:12px 14px;border:1px solid rgba(59, 130, 246, 0.3);
+      border-radius:12px;background:#f8fafc;color:var(--ink);outline:none;
+      transition: all 0.2s ease;
+    }
+    textarea{min-height:90px}
+    input:focus,select:focus,textarea:focus{
+      border-color:var(--brand);
+      box-shadow:0 0 0 3px rgba(59, 130, 246, 0.15);
+      background: white;
+    }
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .btn{
+      border:none;padding:12px 16px;border-radius:14px;
+      background:var(--muted);color:var(--ink);cursor:pointer;
+      font-weight:500;transition:all 0.2s ease;
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+    .btn-primary{background:linear-gradient(135deg,var(--brand),#60a5fa);color:white}
+    .btn-accent{background:linear-gradient(135deg,var(--accent),#a78bfa);color:white}
+    .btn-ok{background:linear-gradient(135deg,var(--ok),#34d399);color:white}
+    .btn-warn{background:linear-gradient(135deg,var(--warn),#fbbf24);color:white}
+    .btn-danger{background:linear-gradient(135deg,var(--danger),#f87171);color:white}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap}
+    .hidden{display:none !important}
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{padding:10px;border-bottom:1px solid rgba(59, 130, 246, 0.15);text-align:right}
+    .table th{color:var(--ink-dim);font-weight:600;background:var(--muted)}
+    .badge{padding:4px 10px;border-radius:999px;background:#f1f5f9;border:1px solid rgba(59, 130, 246, 0.2);font-size:12px;color:var(--ink)}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:16px;border-bottom:1px solid rgba(59, 130, 246, 0.15)}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand .logo{width:50px;height:50px;border-radius:12px;background:#f8fafc;border:2px solid var(--brand);display:flex;align-items:center;justify-content:center;font-weight:bold;color:var(--brand);font-size:20px}
+    .logo-img{width:50px;height:50px;object-fit:contain;border-radius:12px;border:2px solid var(--brand);padding:4px}
+    .link{color:var(--brand);text-decoration:none;font-weight:500}
+    .chip{font-size:12px;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid rgba(59, 130, 246, 0.2);color:var(--ink-dim)}
+    .footer{color:var(--ink-dim);font-size:12px;margin-top:24px;text-align:center;padding-top:16px;border-top:1px solid rgba(59, 130, 246, 0.15)}
+    .permission-badge{
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      background: #f1f5f9;
+      color: var(--ink);
+    }
+    .permission-read { background: #dbeafe; color: #1e40af; }
+    .permission-write { background: #d1fae5; color: #065f46; }
+    .permission-admin { background: #fef3c7; color: #92400e; }
+    
+    /* تنسيقات جديدة للإعدادات */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 24px;
+    }
+    .settings-sidebar {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .settings-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .settings-menu li {
+      margin-bottom: 8px;
+    }
+    .settings-menu a {
+      display: block;
+      padding: 12px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--ink);
+      transition: all 0.2s;
+    }
+    .settings-menu a:hover,
+    .settings-menu a.active {
+      background: var(--muted);
+      color: var(--brand);
+    }
+    .settings-content {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+    .user-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .user-table th,
+    .user-table td {
+      padding: 12px;
+      text-align: right;
+      border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+    }
+    .user-table th {
+      background: var(--muted);
+      color: var(--ink-dim);
+    }
+    .color-preview {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header mb-16">
+      <div class="brand">
+        <!-- شعار المستشفى السعودي كسلا -->
+       <!-- شعار المستشفى السعودي كسلا -->
+<img src="logo.png" alt="شعار المستشفى" class="logo-img">
+        <div>
+          <h1>نظام دفتر العمليات</h1>
+          <p class="muted">المستشفى السعودي – كسلا</p>
+        </div>
+      </div>
+      <div class="row">
+        <span id="currentUser" class="chip">غير مسجل</span>
+        <button class="btn" id="settingsBtn">⚙️ الإعدادات</button>
+        <button class="btn" id="logoutBtn">تسجيل الخروج</button>
+      </div>
+    </div>
+
+    <!-- شاشة الدخول -->
+    <section id="screen-login" class="card p-24">
+      <h2>تسجيل الدخول</h2>
+      <p class="muted">أدخل اسم المستخدم وكلمة المرور للمتابعة.</p>
+      <div class="grid grid-2 mt-16">
+        <div>
+          <label>اسم المستخدم</label>
+          <input id="loginUser" placeholder="مثال: admin" />
+        </div>
+        <div>
+          <label>كلمة المرور</label>
+          <input id="loginPass" type="password" placeholder="••••••••" />
+        </div>
+      </div>
+      <div class="row mt-16">
+        <button class="btn btn-primary" id="loginBtn">دخول</button>
+        <span class="badge">بيانات افتراضية: admin / 1234</span>
+      </div>
+    </section>
+
+    <!-- الرئيسية -->
+    <section id="screen-home" class="hidden">
+      <div class="card p-24">
+        <h2>الصفحة الرئيسية</h2>
+        <p class="muted">اختر أحد الإجراءات التالية.</p>
+        <div class="toolbar mt-16">
+          <button class="btn btn-primary" id="newListBtn">➕ إضافة لِستّة جديدة</button>
+          <button class="btn btn-accent" id="reportsBtn">📊 البحث والتقارير</button>
+          <button class="btn" id="backupBtn">⤴️ نسخ احتياطي</button>
+          <button class="btn" id="restoreBtn">⤵️ استرجاع</button>
+        </div>
+      </div>
+
+      <div class="card p-24 mt-24">
+        <div class="row" style="justify-content:space-between">
+          <h2>اللستّات المحفوظة</h2>
+          <div class="row">
+            <input id="searchLists" placeholder="ابحث باليوم، التاريخ أو الملاحظة" />
+          </div>
+        </div>
+        <table class="table mt-16" id="listsTable">
+          <thead>
+            <tr>
+              <th>اليوم</th>
+              <th>التاريخ</th>
+              <th>عدد العمليات</th>
+              <th>ملاحظات (لستة مستعجلة)</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- إنشاء/تحرير لستة -->
+    <section id="screen-editor" class="hidden">
+      <div class="card p-24">
+        <h2>تفاصيل اللستّة</h2>
+        <div class="grid grid-3 mt-16">
+          <div>
+            <label>اليوم</label>
+            <input id="listDay" placeholder="مثال: الأحد" />
+          </div>
+          <div>
+            <label>التاريخ</label>
+            <input id="listDate" type="date" />
+          </div>
+          <div>
+            <label>ملاحظات لستة مستعجلة أخرى</label>
+            <input id="listNotes" placeholder="اختياري" />
+          </div>
+        </div>
+        <div class="toolbar mt-16">
+          <button class="btn" id="backToHomeFromEditor">⬅️ رجوع</button>
+          <button class="btn btn-ok" id="saveListBtn">💾 حفظ اللستّة</button>
+          <button class="btn btn-warn" id="exportListBtn">📤 تصدير CSV</button>
+          <button class="btn" id="printListBtn">🖨️ طباعة</button>
+        </div>
+      </div>
+
+      <div class="card p-24 mt-24">
+        <div class="row" style="justify-content:space-between;align-items:flex-end">
+          <div>
+            <h2>العمليات</h2>
+            <p class="muted">أضف العمليات وفق الحقول المعتمدة في الدفتر.</p>
+          </div>
+          <button class="btn btn-primary" id="addOpBtn">➕ إضافة عملية</button>
+        </div>
+
+        <table class="table mt-16" id="opsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الاسم</th>
+              <th>رقم الملف</th>
+              <th>نوع العملية<br><span class="muted" style="font-weight:400">كبيرة / متوسطة / صغيرة</span></th>
+              <th>نوع التخدير<br><span class="muted" style="font-weight:400">كامل / نصفي</span></th>
+              <th>تاريخ العملية</th>
+              <th>المخدّر</th>
+              <th>الطبيب</th>
+              <th>المحضِّر</th>
+              <th>الوحدة</th>
+              <th>سبب العملية</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- البحث والتقارير -->
+    <section id="screen-reports" class="hidden">
+      <div class="card p-24">
+        <div class="row" style="justify-content:space-between;align-items:flex-end">
+          <div>
+            <h2>البحث والتقارير</h2>
+            <p class="muted">بحث حسب الطبيب أو المخدّر أو المحضّر أو التاريخ أو الوحدة، مع إحصاءات سريعة.</p>
+          </div>
+          <div class="toolbar">
+            <button class="btn" id="backToHomeFromReports">⬅️ رجوع</button>
+            <button class="btn btn-warn" id="exportReportBtn">📤 تصدير النتائج (CSV)</button>
+            <button class="btn" id="printReportBtn">🖨️ طباعة التقرير</button>
+          </div>
+        </div>
+
+        <div class="grid grid-4 mt-16">
+          <div>
+            <label>التاريخ (من)</label>
+            <input id="filterFrom" type="date" />
+          </div>
+          <div>
+            <label>التاريخ (إلى)</label>
+            <input id="filterTo" type="date" />
+          </div>
+          <div>
+            <label>الطبيب</label>
+            <input id="filterDoctor" placeholder="اسم الطبيب" />
+          </div>
+          <div>
+            <label>المخدّر</label>
+            <input id="filterAnesth" placeholder="اسم المخدّر" />
+          </div>
+          <div>
+            <label>المحضِّر</label>
+            <input id="filterPrep" placeholder="اسم المحضِّر" />
+          </div>
+          <div>
+            <label>الوحدة</label>
+            <input id="filterUnit" placeholder="مثال: جراحة عامة" />
+          </div>
+          <div>
+            <label>نوع العملية</label>
+            <select id="filterOpType">
+              <option value="">الكل</option>
+              <option>كبيرة</option>
+              <option>متوسطة</option>
+              <option>صغيرة</option>
+            </select>
+          </div>
+          <div>
+            <label>نوع التخدير</label>
+            <select id="filterAnType">
+              <option value="">الكل</option>
+              <option>كامل</option>
+              <option>نصفي</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="toolbar mt-16">
+          <button class="btn btn-primary" id="runSearchBtn">بحث</button>
+          <button class="btn" id="clearFiltersBtn">مسح المرشحات</button>
+        </div>
+      </div>
+
+      <div class="card p-24 mt-24">
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <h2>النتائج</h2>
+          <div class="row" id="statsRow"></div>
+        </div>
+        <table class="table mt-16" id="reportTable">
+          <thead>
+            <tr>
+              <th>اليوم</th>
+              <th>التاريخ</th>
+              <th>#</th>
+              <th>الاسم</th>
+              <th>رقم الملف</th>
+              <th>نوع العملية</th>
+              <th>نوع التخdير</th>
+              <th>المخدّر</th>
+              <th>الطبيب</th>
+              <th>المحضِّر</th>
+              <th>الوحدة</th>
+              <th>سبب العملية</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- شاشة الإعدادات -->
+    <section id="screen-settings" class="hidden">
+      <div class="card p-24">
+        <h2>الإعدادات</h2>
+        <p class="muted">إدارة المستخدمين والصلاحيات وإعدادات النظام.</p>
+        
+        <div class="settings-grid mt-24">
+          <div class="settings-sidebar">
+            <ul class="settings-menu">
+              <li><a href="#users" class="active" data-tab="users">👥 إدارة المستخدمين</a></li>
+              <li><a href="#permissions" data-tab="permissions">🔐 إدارة الصلاحيات</a></li>
+              <li><a href="#system" data-tab="system">⚙️ إعدادات النظام</a></li>
+            </ul>
+          </div>
+          
+          <div class="settings-content">
+            <!-- إدارة المستخدمين -->
+            <div id="users-tab">
+              <h3>إدارة المستخدمين</h3>
+              <p class="muted">إضافة وتعديل وحذف المستخدمين في النظام.</p>
+              
+              <div class="card mt-16" style="background: var(--muted);">
+                <div class="p-24">
+                  <h4>إضافة مستخدم جديد</h4>
+                  <div class="grid grid-3 mt-16">
+                    <div>
+                      <label>اسم المستخدم</label>
+                      <input id="newUserName" placeholder="اسم المستخدم" />
+                    </div>
+                    <div>
+                      <label>كلمة المرور</label>
+                      <input id="newUserPass" type="password" placeholder="كلمة المرور" />
+                    </div>
+                    <div>
+                      <label>الصلاحية</label>
+                      <select id="newUserRole">
+                        <option value="admin">مدير النظام</option>
+                        <option value="write">قراءة وكتابة</option>
+                        <option value="read">قراءة فقط</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="toolbar mt-16">
+                    <button class="btn btn-primary" id="addUserBtn">إضافة مستخدم</button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mt-24">
+                <h4>المستخدمين الحاليين</h4>
+                <table class="user-table mt-16">
+                  <thead>
+                    <tr>
+                      <th>اسم المستخدم</th>
+                      <th>الصلاحية</th>
+                      <th>الحالة</th>
+                      <th>الإجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usersTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+            
+            <!-- إدارة الصلاحيات -->
+            <div id="permissions-tab" class="hidden">
+              <h3>إدارة الصلاحيات</h3>
+              <p class="muted">تعديل صلاحيات المستخدمين في النظام.</p>
+              
+              <div class="card mt-24 p-24">
+                <h4>مستويات الصلاحية</h4>
+                <div class="grid grid-3 mt-16">
+                  <div class="card p-16">
+                    <h5>مدير النظام</h5>
+                    <p class="muted">صلاحيات كاملة على النظام بما في ذلك إدارة المستخدمين والإعدادات.</p>
+                    <span class="permission-badge permission-admin">Admin</span>
+                  </div>
+                  <div class="card p-16">
+                    <h5>قراءة وكتابة</h5>
+                    <p class="muted">القدرة على إنشاء وتعديل السجلات ولكن لا يمكن حذفها أو إدارة المستخدمين.</p>
+                    <span class="permission-badge permission-write">Read/Write</span>
+                  </div>
+                  <div class="card p-16">
+                    <h5>قراءة فقط</h5>
+                    <p class="muted">القدرة على عرض السجلات فقط دون إمكانية التعديل أو الحذف.</p>
+                    <span class="permission-badge permission-read">Read Only</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- إعدادات النظام -->
+            <div id="system-tab" class="hidden">
+              <h3>إعدادات النظام</h3>
+              <p class="muted">تخصيص إعدادات النظام العامة.</p>
+              
+              <div class="grid grid-2 mt-24">
+                <div class="card p-16">
+                  <h5>المظهر</h5>
+                  <div class="mt-16">
+                    <label>اللون الرئيسي <span class="color-preview" id="primaryColorPreview" style="background: #3b82f6"></span></label>
+                    <input type="color" id="primaryColor" value="#3b82f6" />
+                  </div>
+                  <div class="mt-16">
+                    <label>اللون الثانوي <span class="color-preview" id="accentColorPreview" style="background: #8b5cf6"></span></label>
+                    <input type="color" id="accentColor" value="#8b5cf6" />
+                  </div>
+                  <button class="btn btn-primary mt-16" id="saveThemeBtn">حفظ التغييرات</button>
+                </div>
+                
+                <div class="card p-16">
+                  <h5>خيارات النسخ الاحتياطي</h5>
+                  <div class="mt-16">
+                    <label>نسخ احتياطي تلقائي</label>
+                    <select id="autoBackup">
+                      <option value="daily">يومي</option>
+                      <option value="weekly">أسبوعي</option>
+                      <option value="monthly">شهري</option>
+                      <option value="none">معطل</option>
+                    </select>
+                  </div>
+                  <button class="btn btn-primary mt-16" id="saveBackupSettingsBtn">حفظ الإعدادات</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="toolbar mt-24">
+          <button class="btn" id="backToHomeFromSettings">⬅️ رجوع للرئيسية</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">© <span id="year"></span> المستشفى السعودي – كسلا. نظام طرفي يعمل بدون إنترنت (LocalStorage).<br>جميع الحقوق محفوظة للمهندس قسم السيد مصطفي الحاج</div>
+  </div>
+
+  <script>
+    // ====== Utilities ======
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const fmtDate = d => d ? new Date(d).toLocaleDateString('ar-EG') : '';
+    const uid = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
+
+    const Storage = {
+      get(){ return JSON.parse(localStorage.getItem('ot_lists')||'[]');},
+      set(arr){ localStorage.setItem('ot_lists', JSON.stringify(arr));},
+      getUsers(){ 
+        const users = JSON.parse(localStorage.getItem('ot_users')||'[]');
+        // إذا لم يكن هناك مستخدمين، نضيف المستخدم الافتراضي
+        if (users.length === 0) {
+          const defaultUsers = [{id: 'admin', u:'admin', p:'1234', name:'المسؤول', role:'admin'}];
+          localStorage.setItem('ot_users', JSON.stringify(defaultUsers));
+          return defaultUsers;
+        }
+        return users;
+      },
+      setUsers(arr){ localStorage.setItem('ot_users', JSON.stringify(arr));},
+      getSettings(){ return JSON.parse(localStorage.getItem('ot_settings')||'{}');},
+      setSettings(obj){ localStorage.setItem('ot_settings', JSON.stringify(obj));},
+      export(){
+        const data = {
+          lists: Storage.get(),
+          users: Storage.getUsers(),
+          settings: Storage.getSettings(),
+          version: '1.0',
+          exportedAt: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'backup_ot_system.json';
+        a.click();
+      },
+      async import(file){
+        const txt = await file.text();
+        const data = JSON.parse(txt);
+        
+        if(data.lists) Storage.set(data.lists);
+        if(data.users) Storage.setUsers(data.users);
+        if(data.settings) Storage.setSettings(data.settings);
+        
+        UI.refreshLists();
+        alert('تم استرجاع النسخة الاحتياطية بنجاح');
+      }
+    };
+
+    const Auth = {
+      users: Storage.getUsers(),
+      login(u,p){
+        const hit = this.users.find(x=>x.u===u && x.p===p);
+        if(hit && hit.active !== false){ 
+          sessionStorage.setItem('ot_user', JSON.stringify(hit)); 
+          return hit;
+        }
+        return null;
+      },
+      current(){ return JSON.parse(sessionStorage.getItem('ot_user')||'null'); },
+      logout(){ sessionStorage.removeItem('ot_user'); },
+      hasPermission(requiredRole){
+        const user = this.current();
+        if(!user) return false;
+        
+        const roles = { admin: 3, write: 2, read: 1 };
+        return roles[user.role] >= roles[requiredRole];
+      },
+      updateUsers(users) {
+        this.users = users;
+        Storage.setUsers(users);
+      }
+    };
+
+    // ====== State ======
+    const State = { currentListId:null, currentSettingsTab: 'users' };
+
+    // ====== Routing / Screens ======
+    function show(id){
+      ['screen-login','screen-home','screen-editor','screen-reports','screen-settings'].forEach(s=>{
+        const el = document.getElementById(s);
+        if(el) el.classList.add('hidden');
+      });
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function requireAuth(){
+      const me = Auth.current();
+      $('#currentUser').textContent = me? `مرحبا، ${me.name} (${me.role})`: 'غير مسجل';
+      $('#logoutBtn').style.display = me? 'inline-flex':'none';
+      $('#settingsBtn').style.display = me? 'inline-flex':'none';
+      
+      // إخفاء الأزرار حسب الصلاحية
+      if(me) {
+        if(!Auth.hasPermission('write')) {
+          $('#newListBtn').style.display = 'none';
+          $('#backupBtn').style.display = 'none';
+          $('#restoreBtn').style.display = 'none';
+        } else {
+          $('#newListBtn').style.display = 'inline-flex';
+          $('#backupBtn').style.display = 'inline-flex';
+          $('#restoreBtn').style.display = 'inline-flex';
+        }
+        
+        if(!Auth.hasPermission('admin')) {
+          $('#settingsBtn').style.display = 'none';
+        }
+      }
+      
+      show(me? 'screen-home':'screen-login');
+    }
+
+    // ====== UI Builders ======
+    const UI = {
+      refreshLists(){
+        const tbody = $('#listsTable tbody');
+        tbody.innerHTML = '';
+        const q = $('#searchLists').value.trim();
+        const all = Storage.get();
+        const rows = all.filter(L=>{
+          const hay = `${L.day} ${L.date} ${L.notes}`;
+          return q? hay.includes(q):true;
+        });
+        rows.sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+        for(const L of rows){
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${L.day||''}</td>
+            <td>${fmtDate(L.date)}</td>
+            <td><span class="badge">${(L.ops||[]).length}</span></td>
+            <td>${L.notes||''}</td>
+            <td class="row">
+              <button class="btn" data-edit="${L.id}">تحرير</button>
+              ${Auth.hasPermission('write') ? `
+                <button class="btn" data-dup="${L.id}">نسخ</button>
+                <button class="btn btn-danger" data-del="${L.id}">حذف</button>
+              ` : ''}
+            </td>`;
+          tbody.appendChild(tr);
+        }
+      },
+      loadListToEditor(list){
+        $('#listDay').value = list.day||'';
+        $('#listDate').value = list.date||'';
+        $('#listNotes').value = list.notes||'';
+        const tbody = $('#opsTable tbody');
+        tbody.innerHTML='';
+        (list.ops||[]).forEach((op,idx)=> tbody.appendChild(UI.opRow(op, idx+1)) );
+      },
+      opRow(op={}, serial){
+        const tr = document.createElement('tr');
+        const safe = k=> op[k]||'';
+        tr.innerHTML = `
+          <td class="muted">${serial}</td>
+          <td><input data-k="name" value="${safe('name')}" placeholder="اسم المريض"/></td>
+          <td><input data-k="fileNo" value="${safe('fileNo')}" placeholder="رقم الملف"/></td>
+          <td>
+            <select data-k="opType">
+              <option ${safe('opType')==='كبيرة'?'selected':''}>كبيرة</option>
+              <option ${safe('opType')==='متوسطة'?'selected':''}>متوسطة</option>
+              <option ${safe('opType')==='صغيرة'?'selected':''}>صغيرة</option>
+            </select>
+          </td>
+          <td>
+            <select data-k="anType">
+              <option ${safe('anType')==='كامل'?'selected':''}>كامل</option>
+              <option ${safe('anType')==='نصفي'?'selected':''}>نصفي</option>
+            </select>
+          </td>
+          <td><input type="date" data-k="opDate" value="${safe('opDate')}"/></td>
+          <td><input data-k="anesthetist" value="${safe('anesthetist')}" placeholder="المخدّر"/></td>
+          <td><input data-k="doctor" value="${safe('doctor')}" placeholder="الطبيب"/></td>
+          <td><input data-k="preparer" value="${safe('preparer')}" placeholder="المحضِّر"/></td>
+          <td><input data-k="unit" value="${safe('unit')}" placeholder="الوحدة"/></td>
+          <td><input data-k="reason" value="${safe('reason')}" placeholder="سبب العملية"/></td>
+          <td class="row">
+            ${Auth.hasPermission('write') ? `
+              <button class="btn" data-copy>نسخ</button>
+              <button class="btn btn-danger" data-remove>حذف</button>
+            ` : ''}
+          </td>`;
+        return tr;
+      },
+      refreshUsersTable() {
+        const tbody = $('#usersTableBody');
+        tbody.innerHTML = '';
+        
+        const currentUser = Auth.current();
+        const users = Auth.users;
+        
+        users.forEach(user => {
+          const tr = document.createElement('tr');
+          
+          // تحديد نص الصلاحية
+          let roleText = '';
+          let roleClass = '';
+          if(user.role === 'admin') {
+            roleText = 'مدير النظام';
+            roleClass = 'permission-admin';
+          } else if(user.role === 'write') {
+            roleText = 'قراءة وكتابة';
+            roleClass = 'permission-write';
+          } else {
+            roleText = 'قراءة فقط';
+            roleClass = 'permission-read';
+          }
+          
+          tr.innerHTML = `
+            <td>${user.u} ${currentUser && user.id === currentUser.id ? '(أنت)' : ''}</td>
+            <td><span class="permission-badge ${roleClass}">${roleText}</span></td>
+            <td>${user.active !== false ? 'نشط' : 'غير نشط'}</td>
+            <td class="row">
+              ${!currentUser || user.id !== currentUser.id ? `
+                <button class="btn" data-user-edit="${user.id}">تعديل</button>
+                <button class="btn btn-danger" data-user-delete="${user.id}">حذف</button>
+              ` : 'لا يمكن تعديل حسابك'}
+            </td>
+          `;
+          
+          tbody.appendChild(tr);
+        });
+      },
+      showSettingsTab(tabId) {
+        // إخفاء كل التبويبات
+        $('#users-tab').classList.add('hidden');
+        $('#permissions-tab').classList.add('hidden');
+        $('#system-tab').classList.add('hidden');
+        
+        // إظهار التبويب المطلوب
+        $(`#${tabId}-tab`).classList.remove('hidden');
+        
+        // تحديث حالة القائمة
+        $$('.settings-menu a').forEach(a => {
+          a.classList.remove('active');
+          if(a.dataset.tab === tabId) {
+            a.classList.add('active');
+          }
+        });
+        
+        State.currentSettingsTab = tabId;
+      }
+    };
+
+    // ====== List CRUD ======
+    function getCurrent(){
+      const id = State.currentListId;
+      return Storage.get().find(x=>x.id===id);
+    }
+
+    function saveEditorToState(){
+      if(!Auth.hasPermission('write')) {
+        alert('ليس لديك صلاحية للتعديل');
+        return;
+      }
+      
+      const id = State.currentListId || uid();
+      const all = Storage.get();
+      let list = all.find(x=>x.id===id);
+      if(!list){ list = {id, ops:[]}; all.push(list); }
+      list.day = $('#listDay').value.trim();
+      list.date = $('#listDate').value||'';
+      list.notes = $('#listNotes').value.trim();
+      // read rows
+      const ops=[];
+      $$('#opsTable tbody tr').forEach(tr=>{
+        const obj={};
+        $$('input,select', tr).forEach(el=>{ obj[el.dataset.k]=el.value.trim(); });
+        // ignore empty rows (no name & no doctor)
+        if(obj.name || obj.doctor) ops.push(obj);
+      });
+      list.ops = ops;
+      Storage.set(all);
+      State.currentListId = id;
+      UI.refreshLists();
+    }
+
+    function deleteList(id){
+      if(!Auth.hasPermission('write')) {
+        alert('ليس لديك صلاحية للحذف');
+        return;
+      }
+      
+      if(!confirm('تأكيد حذف اللستّة؟')) return;
+      const all = Storage.get().filter(x=>x.id!==id);
+      Storage.set(all);
+      if(State.currentListId===id) State.currentListId = null;
+      UI.refreshLists();
+    }
+
+    // ====== Reports ======
+    function gatherAllOps(){
+      const out=[];
+      for(const L of Storage.get()){
+        (L.ops||[]).forEach((op,i)=> out.push({
+          day:L.day||'', date:L.date||'', serial:i+1, ...op
+        }));
+      }
+      return out;
+    }
+
+    function runSearch(){
+      const from = $('#filterFrom').value? new Date($('#filterFrom').value):null;
+      const to   = $('#filterTo').value? new Date($('#filterTo').value):null;
+      const doc  = $('#filterDoctor').value.trim();
+      const an   = $('#filterAnesth').value.trim();
+      const prep = $('#filterPrep').value.trim();
+      const unit = $('#filterUnit').value.trim();
+      const opT  = $('#filterOpType').value;
+      const anT  = $('#filterAnType').value;
+
+      let rows = gatherAllOps();
+      rows = rows.filter(r=>{
+        const d = r.opDate? new Date(r.opDate): (r.date? new Date(r.date):null);
+        if(from && (!d || d < from)) return false;
+        if(to && (!d || d > to)) return false;
+        if(doc && !(r.doctor||'').includes(doc)) return false;
+        if(an && !(r.anesthetist||'').includes(an)) return false;
+        if(prep && !(r.preparer||'').includes(prep)) return false;
+        if(unit && !(r.unit||'').includes(unit)) return false;
+        if(opT && r.opType!==opT) return false;
+        if(anT && r.anType!==anT) return false;
+        return true;
+      });
+
+      // table
+      const tb = $('#reportTable tbody');
+      tb.innerHTML = '';
+      rows.forEach(r=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${r.day}</td>
+          <td>${fmtDate(r.date)}</td>
+          <td>${r.serial}</td>
+          <td>${r.name||''}</td>
+          <td>${r.fileNo||''}</td>
+          <td>${r.opType||''}</td>
+          <td>${r.anType||''}</td>
+          <td>${r.anesthetist||''}</td>
+          <td>${r.doctor||''}</td>
+          <td>${r.preparer||''}</td>
+          <td>${r.unit||''}</td>
+          <td>${r.reason||''}</td>`;
+        tb.appendChild(tr);
+      });
+
+      // stats
+      const s = {
+        total: rows.length,
+        big: rows.filter(r=>r.opType==='كبيرة').length,
+        medium: rows.filter(r=>r.opType==='متوسطة').length,
+        small: rows.filter(r=>r.opType==='صغيرة').length,
+        full: rows.filter(r=>r.anType==='كامل').length,
+        half: rows.filter(r=>r.anType==='نصفي').length,
+      };
+      const statsRow = $('#statsRow');
+      statsRow.innerHTML = '';
+      const box = (title,val)=>{
+        const span = document.createElement('span');
+        span.className='chip';
+        span.textContent = `${title}: ${val}`;
+        return span;
+      };
+      statsRow.append(
+        box('إجمالي العمليات', s.total),
+        box('كبيرة', s.big),
+        box('متوسطة', s.medium),
+        box('صغيرة', s.small),
+        box('تخدير كامل', s.full),
+        box('تخدير نصفي', s.half),
+      );
+    }
+
+    // ====== CSV Export ======
+    function toCSV(rows, headers){
+      const csv = [headers.join(',')].concat(rows.map(r=> headers.map(h=> (`${r[h]??''}`.replaceAll('"','""')) ).map(x=>`"${x}"`).join(',')) ).join('\n');
+      return new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    }
+
+    function exportListCSV(list){
+      const headers = ['اليوم','التاريخ','#','الاسم','رقم الملف','نوع العملية','نوع التخدير','المخدّر','الطبيب','المحضِّر','الوحدة','سبب العملية'];
+      const rows = (list.ops||[]).map((op,i)=>({
+        'اليوم': list.day||'',
+        'التاريخ': fmtDate(list.date),
+        '#': i+1,
+        'الاسم': op.name||'',
+        'رقم الملف': op.fileNo||'',
+        'نوع العملية': op.opType||'',
+        'نوع التخدير': op.anType||'',
+        'المخدّر': op.anesthetist||'',
+        'الطبيب': op.doctor||'',
+        'المحضِّر': op.preparer||'',
+        'الوحدة': op.unit||'',
+        'سبب العملية': op.reason||'',
+      }));
+      const blob = toCSV(rows, headers);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `قائمة_العمليات_${list.day||''}_${list.date||''}.csv`;
+      a.click();
+    }
+
+    function exportReportCSV(){
+      const headers = ['اليوم','التاريخ','#','الاسم','رقم الملف','نوع العملية','نوع التخدير','المخدّر','الطبيب','المحضِّر','الوحدة','سبب العملية'];
+      const rows=[];
+      $$('#reportTable tbody tr').forEach(tr=>{
+        const cells = Array.from(tr.children).map(td=>td.textContent);
+        const obj={}; headers.forEach((h,i)=>obj[h]=cells[i]||'');
+        rows.push(obj);
+      });
+      const blob = toCSV(rows, headers);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'تقرير_العمليات.csv';
+      a.click();
+    }
+
+    // ====== Printing ======
+    function printElement(selector, title){
+      const html = `<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>${title}</title>
+      <style>
+        body{font-family:Tajawal,Arial,sans-serif;padding:24px}
+        table{width:100%;border-collapse:collapse}
+        th,td{border:1px solid #ddd;padding:8px}
+        th{background:#f3f4f6}
+      </style></head><body>${document.querySelector(selector).outerHTML}</body></html>`;
+      const w = window.open('', '_blank');
+      w.document.write(html); w.document.close(); w.focus(); w.print();
+    }
+
+    // ====== Event Wiring ======
+    window.addEventListener('DOMContentLoaded', ()=>{
+      $('#year').textContent = new Date().getFullYear();
+
+      // auth
+      requireAuth();
+      $('#loginBtn').onclick = ()=>{
+        const u = $('#loginUser').value.trim();
+        const p = $('#loginPass').value;
+        const user = Auth.login(u,p);
+        if(user){
+          $('#loginPass').value='';
+          requireAuth();
+        } else alert('بيانات الدخول غير صحيحة');
+      };
+      $('#logoutBtn').onclick = ()=>{ Auth.logout(); requireAuth(); };
+      $('#settingsBtn').onclick = ()=>{ 
+        if(Auth.hasPermission('admin')) {
+          UI.refreshUsersTable();
+          UI.showSettingsTab('users');
+          show('screen-settings'); 
+        } else {
+          alert('ليس لديك صلاحية للوصول إلى الإعدادات');
+        }
+      };
+
+      // home
+      UI.refreshLists();
+      $('#searchLists').oninput = UI.refreshLists;
+      $('#newListBtn').onclick = ()=>{ 
+        if(Auth.hasPermission('write')) {
+          State.currentListId=null; 
+          UI.loadListToEditor({ops:[]}); 
+          show('screen-editor'); 
+        } else {
+          alert('ليس لديك صلاحية لإضافة لستة جديدة');
+        }
+      };
+      $('#reportsBtn').onclick = ()=>{ show('screen-reports'); runSearch(); };
+      $('#backupBtn').onclick = ()=> Storage.export();
+      $('#restoreBtn').onclick = ()=>{
+        if(!Auth.hasPermission('write')) {
+          alert('ليس لديك صلاحية للاسترجاع');
+          return;
+        }
+        const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json';
+        inp.onchange = ()=> Storage.import(inp.files[0]).catch(e=>alert('فشل الاسترجاع: '+e.message));
+        inp.click();
+      };
+      $('#listsTable').addEventListener('click', (e)=>{
+        const btn = e.target.closest('button'); if(!btn) return;
+        const id = btn.dataset.edit||btn.dataset.del||btn.dataset.dup;
+        const all = Storage.get(); const L = all.find(x=>x.id===id);
+        if(btn.dataset.edit){ 
+          State.currentListId=id; 
+          UI.loadListToEditor(L); 
+          show('screen-editor'); 
+        }
+        if(btn.dataset.del){ 
+          if(Auth.hasPermission('write')) {
+            deleteList(id); 
+          } else {
+            alert('ليس لديك صلاحية للحذف');
+          }
+        }
+        if(btn.dataset.dup){ 
+          if(Auth.hasPermission('write')) {
+            const copy = JSON.parse(JSON.stringify(L)); 
+            copy.id=uid(); 
+            copy.day += ' (نسخة)'; 
+            all.push(copy); 
+            Storage.set(all); 
+            UI.refreshLists(); 
+          } else {
+            alert('ليس لديك صلاحية لإنشاء نسخة');
+          }
+        }
+      });
+
+      // editor
+      $('#addOpBtn').onclick = ()=>{
+        if(Auth.hasPermission('write')) {
+          $('#opsTable tbody').appendChild(UI.opRow({}, $$('#opsTable tbody tr').length+1));
+        } else {
+          alert('ليس لديك صلاحية لإضافة عمليات');
+        }
+      };
+      $('#opsTable').addEventListener('click', (e)=>{
+        if(!Auth.hasPermission('write')) {
+          alert('ليس لديك صلاحية للتعديل');
+          return;
+        }
+        
+        const tr = e.target.closest('tr'); if(!tr) return;
+        if(e.target.matches('[data-remove]')){ tr.remove(); reorderSerials(); }
+        if(e.target.matches('[data-copy]')){
+          const obj={}; $$('input,select', tr).forEach(el=> obj[el.dataset.k]=el.value );
+          $('#opsTable tbody').appendChild(UI.opRow(obj, $$('#opsTable tbody tr').length+1));
+        }
+      });
+      function reorderSerials(){ $$('#opsTable tbody tr').forEach((tr,i)=> tr.firstElementChild.textContent = i+1 ); }
+
+      $('#saveListBtn').onclick = ()=>{ saveEditorToState(); alert('تم الحفظ'); };
+      $('#backToHomeFromEditor').onclick = ()=>{ saveEditorToState(); show('screen-home'); };
+      $('#exportListBtn').onclick = ()=>{ const L = getCurrent(); if(L) exportListCSV(L); };
+      $('#printListBtn').onclick = ()=> printElement('#opsTable', 'قائمة العمليات');
+
+      // reports
+      $('#runSearchBtn').onclick = runSearch;
+      $('#clearFiltersBtn').onclick = ()=>{ ['filterFrom','filterTo','filterDoctor','filterAnesth','filterPrep','filterUnit'].forEach(id=> document.getElementById(id).value=''); $('#filterOpType').value=''; $('#filterAnType').value=''; runSearch(); };
+      $('#exportReportBtn').onclick = exportReportCSV;
+      $('#printReportBtn').onclick = ()=> printElement('#reportTable', 'تقرير العمليات');
+      $('#backToHomeFromReports').onclick = ()=> show('screen-home');
+      
+      // settings
+      $('#backToHomeFromSettings').onclick = ()=> show('screen-home');
+      
+      // تبويبات الإعدادات
+      $$('.settings-menu a').forEach(a => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          UI.showSettingsTab(a.dataset.tab);
+        });
+      });
+      
+      // إضافة مستخدم جديد
+      $('#addUserBtn').onclick = () => {
+        const username = $('#newUserName').value.trim();
+        const password = $('#newUserPass').value;
+        const role = $('#newUserRole').value;
+        
+        if(!username || !password) {
+          alert('يرجى إدخال اسم المستخدم وكلمة المرور');
+          return;
+        }
+        
+        if(Auth.users.some(u => u.u === username)) {
+          alert('اسم المستخدم موجود مسبقاً');
+          return;
+        }
+        
+        const newUser = {
+          id: uid(),
+          u: username,
+          p: password,
+          name: username,
+          role: role,
+          active: true
+        };
+        
+        Auth.users.push(newUser);
+        Auth.updateUsers(Auth.users);
+        UI.refreshUsersTable();
+        
+        $('#newUserName').value = '';
+        $('#newUserPass').value = '';
+        
+        alert('تم إضافة المستخدم بنجاح');
+      };
+      
+      // إدارة المستخدمين
+      $('#usersTableBody').addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if(!btn) return;
+        
+        const userId = btn.dataset.userEdit || btn.dataset.userDelete;
+        const user = Auth.users.find(u => u.id === userId);
+        
+        if(!user) return;
+        
+        if(btn.dataset.userEdit) {
+          const newPassword = prompt('أدخل كلمة المرور الجديدة (اتركه فارغاً إذا لم ترد التغيير):');
+          if(newPassword === null) return; // تم إلغاء الأمر
+          
+          if(newPassword) {
+            user.p = newPassword;
+          }
+          
+          const newRole = prompt('أدخل الصلاحية الجديدة (admin/write/read):', user.role);
+          if(newRole && ['admin', 'write', 'read'].includes(newRole)) {
+            user.role = newRole;
+          }
+          
+          Auth.updateUsers(Auth.users);
+          UI.refreshUsersTable();
+          alert('تم تحديث المستخدم بنجاح');
+        }
+        
+        if(btn.dataset.userDelete) {
+          if(!confirm(`هل أنت متأكد من حذف المستخدم "${user.u}"؟`)) return;
+          
+          Auth.users = Auth.users.filter(u => u.id !== userId);
+          Auth.updateUsers(Auth.users);
+          UI.refreshUsersTable();
+          alert('تم حذف المستخدم بنجاح');
+        }
+      });
+      
+      // معاينة الألوان
+      $('#primaryColor').addEventListener('input', (e) => {
+        $('#primaryColorPreview').style.backgroundColor = e.target.value;
+      });
+      
+      $('#accentColor').addEventListener('input', (e) => {
+        $('#accentColorPreview').style.backgroundColor = e.target.value;
+      });
+      
+      // حفظ إعدادات المظهر
+      $('#saveThemeBtn').onclick = () => {
+        const primaryColor = $('#primaryColor').value;
+        const accentColor = $('#accentColor').value;
+        
+        // حفظ الإعدادات
+        const settings = Storage.getSettings();
+        settings.theme = { primaryColor, accentColor };
+        Storage.setSettings(settings);
+        
+        alert('تم حفظ إعدادات المظهر بنجاح');
+      };
+      
+      // حفظ إعدادات النسخ الاحتياطي
+      $('#saveBackupSettingsBtn').onclick = () => {
+        const autoBackup = $('#autoBackup').value;
+        
+        // حفظ الإعدادات
+        const settings = Storage.getSettings();
+        settings.autoBackup = autoBackup;
+        Storage.setSettings(settings);
+        
+        alert('تم حفظ إعدادات النسخ الاحتياطي بنجاح');
+      };
+    });
+  </script>
+</body>
+</html>
