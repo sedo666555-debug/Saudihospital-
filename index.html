@@ -155,6 +155,37 @@
       margin-right: 8px;
       vertical-align: middle;
     }
+    
+    /* تنسيقات جديدة لعرض العمليات بشكل عمودي */
+    .op-form-container {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    .op-form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    .op-form-title {
+      font-weight: 600;
+      color: var(--brand);
+    }
+    .op-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 900px) {
+      .op-form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -162,8 +193,7 @@
     <div class="header mb-16">
       <div class="brand">
         <!-- شعار المستشفى السعودي كسلا -->
-       <!-- شعار المستشفى السعودي كسلا -->
-<img src="logo.png" alt="شعار المستشفى" class="logo-img">
+        <img src="logo.png" alt="شعار المستشفى" class="logo-img">
         <div>
           <h1>نظام دفتر العمليات</h1>
           <p class="muted">المستشفى السعودي – كسلا</p>
@@ -192,7 +222,6 @@
       </div>
       <div class="row mt-16">
         <button class="btn btn-primary" id="loginBtn">دخول</button>
-        <span class="badge">بيانات افتراضية: admin / 1234</span>
       </div>
     </section>
 
@@ -266,25 +295,7 @@
           <button class="btn btn-primary" id="addOpBtn">➕ إضافة عملية</button>
         </div>
 
-        <table class="table mt-16" id="opsTable">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>الاسم</th>
-              <th>رقم الملف</th>
-              <th>نوع العملية<br><span class="muted" style="font-weight:400">كبيرة / متوسطة / صغيرة</span></th>
-              <th>نوع التخدير<br><span class="muted" style="font-weight:400">كامل / نصفي</span></th>
-              <th>تاريخ العملية</th>
-              <th>المخدّر</th>
-              <th>الطبيب</th>
-              <th>المحضِّر</th>
-              <th>الوحدة</th>
-              <th>سبب العملية</th>
-              <th>إجراءات</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <div id="opsContainer" class="mt-16"></div>
       </div>
     </section>
 
@@ -367,7 +378,7 @@
               <th>الاسم</th>
               <th>رقم الملف</th>
               <th>نوع العملية</th>
-              <th>نوع التخdير</th>
+              <th>نوع التخدير</th>
               <th>المخدّر</th>
               <th>الطبيب</th>
               <th>المحضِّر</th>
@@ -663,43 +674,77 @@
         $('#listDay').value = list.day||'';
         $('#listDate').value = list.date||'';
         $('#listNotes').value = list.notes||'';
-        const tbody = $('#opsTable tbody');
-        tbody.innerHTML='';
-        (list.ops||[]).forEach((op,idx)=> tbody.appendChild(UI.opRow(op, idx+1)) );
+        const container = $('#opsContainer');
+        container.innerHTML='';
+        (list.ops||[]).forEach((op,idx)=> container.appendChild(UI.opForm(op, idx+1)) );
       },
-      opRow(op={}, serial){
-        const tr = document.createElement('tr');
+      opForm(op={}, serial){
+        const form = document.createElement('div');
+        form.className = 'op-form-container';
+        form.dataset.serial = serial;
+        
         const safe = k=> op[k]||'';
-        tr.innerHTML = `
-          <td class="muted">${serial}</td>
-          <td><input data-k="name" value="${safe('name')}" placeholder="اسم المريض"/></td>
-          <td><input data-k="fileNo" value="${safe('fileNo')}" placeholder="رقم الملف"/></td>
-          <td>
-            <select data-k="opType">
-              <option ${safe('opType')==='كبيرة'?'selected':''}>كبيرة</option>
-              <option ${safe('opType')==='متوسطة'?'selected':''}>متوسطة</option>
-              <option ${safe('opType')==='صغيرة'?'selected':''}>صغيرة</option>
-            </select>
-          </td>
-          <td>
-            <select data-k="anType">
-              <option ${safe('anType')==='كامل'?'selected':''}>كامل</option>
-              <option ${safe('anType')==='نصفي'?'selected':''}>نصفي</option>
-            </select>
-          </td>
-          <td><input type="date" data-k="opDate" value="${safe('opDate')}"/></td>
-          <td><input data-k="anesthetist" value="${safe('anesthetist')}" placeholder="المخدّر"/></td>
-          <td><input data-k="doctor" value="${safe('doctor')}" placeholder="الطبيب"/></td>
-          <td><input data-k="preparer" value="${safe('preparer')}" placeholder="المحضِّر"/></td>
-          <td><input data-k="unit" value="${safe('unit')}" placeholder="الوحدة"/></td>
-          <td><input data-k="reason" value="${safe('reason')}" placeholder="سبب العملية"/></td>
-          <td class="row">
-            ${Auth.hasPermission('write') ? `
-              <button class="btn" data-copy>نسخ</button>
-              <button class="btn btn-danger" data-remove>حذف</button>
-            ` : ''}
-          </td>`;
-        return tr;
+        
+        form.innerHTML = `
+          <div class="op-form-header">
+            <div class="op-form-title">العملية #${serial}</div>
+            <div class="row">
+              ${Auth.hasPermission('write') ? `
+                <button class="btn" data-copy>نسخ</button>
+                <button class="btn btn-danger" data-remove>حذف</button>
+              ` : ''}
+            </div>
+          </div>
+          <div class="op-form-grid">
+            <div>
+              <label>الاسم</label>
+              <input data-k="name" value="${safe('name')}" placeholder="اسم المريض"/>
+            </div>
+            <div>
+              <label>رقم الملف</label>
+              <input data-k="fileNo" value="${safe('fileNo')}" placeholder="رقم الملف"/>
+            </div>
+            <div>
+              <label>نوع العملية</label>
+              <select data-k="opType">
+                <option ${safe('opType')==='كبيرة'?'selected':''}>كبيرة</option>
+                <option ${safe('opType')==='متوسطة'?'selected':''}>متوسطة</option>
+                <option ${safe('opType')==='صغيرة'?'selected':''}>صغيرة</option>
+              </select>
+            </div>
+            <div>
+              <label>نوع التخدير</label>
+              <select data-k="anType">
+                <option ${safe('anType')==='كامل'?'selected':''}>كامل</option>
+                <option ${safe('anType')==='نصفي'?'selected':''}>نصفي</option>
+              </select>
+            </div>
+            <div>
+              <label>تاريخ العملية</label>
+              <input type="date" data-k="opDate" value="${safe('opDate')}"/>
+            </div>
+            <div>
+              <label>المخدّر</label>
+              <input data-k="anesthetist" value="${safe('anesthetist')}" placeholder="المخدّر"/>
+            </div>
+            <div>
+              <label>الطبيب</label>
+              <input data-k="doctor" value="${safe('doctor')}" placeholder="الطبيب"/>
+            </div>
+            <div>
+              <label>المحضِّر</label>
+              <input data-k="preparer" value="${safe('preparer')}" placeholder="المحضِّر"/>
+            </div>
+            <div>
+              <label>الوحدة</label>
+              <input data-k="unit" value="${safe('unit')}" placeholder="الوحدة"/>
+            </div>
+            <div>
+              <label>سبب العملية</label>
+              <input data-k="reason" value="${safe('reason')}" placeholder="سبب العملية"/>
+            </div>
+          </div>`;
+        return form;
       },
       refreshUsersTable() {
         const tbody = $('#usersTableBody');
@@ -780,12 +825,12 @@
       list.day = $('#listDay').value.trim();
       list.date = $('#listDate').value||'';
       list.notes = $('#listNotes').value.trim();
-      // read rows
+      // read forms
       const ops=[];
-      $$('#opsTable tbody tr').forEach(tr=>{
+      $$('#opsContainer .op-form-container').forEach(form=>{
         const obj={};
-        $$('input,select', tr).forEach(el=>{ obj[el.dataset.k]=el.value.trim(); });
-        // ignore empty rows (no name & no doctor)
+        $$('input,select', form).forEach(el=>{ obj[el.dataset.k]=el.value.trim(); });
+        // ignore empty forms (no name & no doctor)
         if(obj.name || obj.doctor) ops.push(obj);
       });
       list.ops = ops;
@@ -1029,30 +1074,110 @@
       // editor
       $('#addOpBtn').onclick = ()=>{
         if(Auth.hasPermission('write')) {
-          $('#opsTable tbody').appendChild(UI.opRow({}, $$('#opsTable tbody tr').length+1));
+          $('#opsContainer').appendChild(UI.opForm({}, $$('#opsContainer .op-form-container').length+1));
         } else {
           alert('ليس لديك صلاحية لإضافة عمليات');
         }
       };
-      $('#opsTable').addEventListener('click', (e)=>{
+      $('#opsContainer').addEventListener('click', (e)=>{
         if(!Auth.hasPermission('write')) {
           alert('ليس لديك صلاحية للتعديل');
           return;
         }
         
-        const tr = e.target.closest('tr'); if(!tr) return;
-        if(e.target.matches('[data-remove]')){ tr.remove(); reorderSerials(); }
+        const form = e.target.closest('.op-form-container'); if(!form) return;
+        if(e.target.matches('[data-remove]')){ 
+          form.remove(); 
+          // إعادة ترقيم النماذج المتبقية
+          $$('#opsContainer .op-form-container').forEach((f, i) => {
+            const title = f.querySelector('.op-form-title');
+            if (title) title.textContent = `العملية #${i+1}`;
+            f.dataset.serial = i+1;
+          });
+        }
         if(e.target.matches('[data-copy]')){
-          const obj={}; $$('input,select', tr).forEach(el=> obj[el.dataset.k]=el.value );
-          $('#opsTable tbody').appendChild(UI.opRow(obj, $$('#opsTable tbody tr').length+1));
+          const obj={}; 
+          $$('input,select', form).forEach(el=> obj[el.dataset.k]=el.value );
+          $('#opsContainer').appendChild(UI.opForm(obj, $$('#opsContainer .op-form-container').length+1));
         }
       });
-      function reorderSerials(){ $$('#opsTable tbody tr').forEach((tr,i)=> tr.firstElementChild.textContent = i+1 ); }
 
       $('#saveListBtn').onclick = ()=>{ saveEditorToState(); alert('تم الحفظ'); };
       $('#backToHomeFromEditor').onclick = ()=>{ saveEditorToState(); show('screen-home'); };
       $('#exportListBtn').onclick = ()=>{ const L = getCurrent(); if(L) exportListCSV(L); };
-      $('#printListBtn').onclick = ()=> printElement('#opsTable', 'قائمة العمليات');
+      $('#printListBtn').onclick = ()=> {
+        // إنشاء جدول مؤقت للطباعة
+        const table = document.createElement('table');
+        table.className = 'table';
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الاسم</th>
+              <th>رقم الملف</th>
+              <th>نوع العملية</th>
+              <th>نوع التخدير</th>
+              <th>تاريخ العملية</th>
+              <th>المخدّر</th>
+              <th>الطبيب</th>
+              <th>المحضِّر</th>
+              <th>الوحدة</th>
+              <th>سبب العملية</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        `;
+        
+        const tbody = table.querySelector('tbody');
+        $$('#opsContainer .op-form-container').forEach(form => {
+          const obj = {};
+          $$('input,select', form).forEach(el => { obj[el.dataset.k] = el.value; });
+          
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${form.dataset.serial}</td>
+            <td>${obj.name || ''}</td>
+            <td>${obj.fileNo || ''}</td>
+            <td>${obj.opType || ''}</td>
+            <td>${obj.anType || ''}</td>
+            <td>${obj.opDate || ''}</td>
+            <td>${obj.anesthetist || ''}</td>
+            <td>${obj.doctor || ''}</td>
+            <td>${obj.preparer || ''}</td>
+            <td>${obj.unit || ''}</td>
+            <td>${obj.reason || ''}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+          <!doctype html>
+          <html dir="rtl" lang="ar">
+          <head>
+            <meta charset="utf-8">
+            <title>قائمة العمليات</title>
+            <style>
+              body { font-family: Tajawal, Arial, sans-serif; padding: 24px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
+              th { background-color: #f3f4f6; }
+              h2 { color: #3b82f6; }
+            </style>
+          </head>
+          <body>
+            <h2>قائمة العمليات</h2>
+            <p><strong>اليوم:</strong> ${$('#listDay').value}</p>
+            <p><strong>التاريخ:</strong> ${$('#listDate').value}</p>
+            <p><strong>ملاحظات:</strong> ${$('#listNotes').value}</p>
+            ${table.outerHTML}
+          </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+      };
 
       // reports
       $('#runSearchBtn').onclick = runSearch;
